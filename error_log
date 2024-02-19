@@ -1,0 +1,18 @@
+[17-Jul-2023 23:32:09 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') in /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/autoload_real.php:78
+Stack trace:
+#0 /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/autoload_real.php(61): composerRequire430f8f03113d135ad10b9b4adc0ce375('6e3fae29631ef28...', '/home3/drovenpl...')
+#1 /home3/drovenplustachir/public_html/inmobalista.com/vendor/autoload.php(7): ComposerAutoloaderInit430f8f03113d135ad10b9b4adc0ce375::getLoader()
+#2 /home3/drovenplustachir/public_html/inmobalista.com/public/index.php(24): require('/home3/drovenpl...')
+#3 /home3/drovenplustachir/public_html/inmobalista.com/server.php(21): require_once('/home3/drovenpl...')
+#4 {main}
+  thrown in /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/autoload_real.php on line 78
+[26-Aug-2023 00:00:43 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 7.4.0". You are running 7.3.33. in /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/platform_check.php on line 24
+[14-Sep-2023 04:03:00 Asia/Dhaka] PHP Fatal error:  During class fetch: Uncaught ErrorException: include(): read of 2637 bytes failed with errno=12 Cannot allocate memory in /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/ClassLoader.php:571
+Stack trace:
+#0 /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/ClassLoader.php(571): Illuminate\Foundation\Bootstrap\HandleExceptions->handleError(8, 'include(): read...', '/home3/drovenpl...', 571, Array)
+#1 /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/ClassLoader.php(571): include()
+#2 /home3/drovenplustachir/public_html/inmobalista.com/vendor/composer/ClassLoader.php(428): Composer\Autoload\includeFile('/home3/drovenpl...')
+#3 [internal function]: Composer\Autoload\ClassLoader->loadClass('Symfony\\Contrac...')
+#4 [internal function]: spl_autoload_call('Symfony\\Contrac...')
+#5 /home3/drovenplustachir/public_html/inmobalista.com/vendor/nesbot/carbon/src/Carbon/Traits/Localization.php(27): class_alias('Symfony\\Contrac...', 'Symfony\\Compone...')
+#6 /home3/dr in /home3/drovenplustachir/public_html/inmobalista.com/vendor/nesbot/carbon/src/Carbon/Traits/Options.php on line 26
