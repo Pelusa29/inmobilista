@@ -118,6 +118,7 @@ Route::post('user-contact-message', [ContactController::class, 'messageForUser']
 
 Route::get('/download-listing-file/{file}', [HomeController::class, 'downloadListingFile'])->name('download-listing-file');
 //Get Townships
+Route::get('township-data', [HomeController::class, 'dataTownships'])->name('dataTownships');
 Route::get('township-get', [TownshipController::class, 'getTownships'])->name('getTownships');
 
 

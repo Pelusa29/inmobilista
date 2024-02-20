@@ -40,11 +40,19 @@
                 <div class="col-xl-6 col-md-6">
                   <div class="wsus__property_input">
                     <label for="#">{{ $websiteLang->where('lang_key','city')->first()->custom_text }} <span class="text-danger">*</span></label>
-                    <select class="select_2" name="city">
+                    <select class="select_2" name="city" id="city_id" onchange="getTownshipData()">
                         <option value="">{{ $websiteLang->where('lang_key','select_city')->first()->custom_text }}</option>
                         @foreach ($cities as $item)
                         <option {{ old('city')==$item->id ? 'selected' : '' }} value="{{ $item->id }}">{{ $item->name.', '.$item->countryState->name.', '.$item->countryState->country->name }}</option>
                         @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xl-6 col-md-6">
+                  <div class="wsus__property_input">
+                    <label for="#">{{ $websiteLang->where('lang_key','all_township')->first()->custom_text }} <span class="text-danger">*</span></label>
+                    <select class="select_2" name="township" id="township">
+                        <option value="">{{ $websiteLang->where('lang_key','select_township')->first()->custom_text }}</option>
                     </select>
                   </div>
                 </div>
@@ -576,6 +584,26 @@
             .toLowerCase()
             .replace(/[^\w ]+/g,'')
             .replace(/ +/g,'-');
+    }
+
+    function getTownshipData(){
+        var city_id = $('#city_id').val();
+        console.log(city_id);
+        $.ajax({
+            type: "GET",
+            url: "{{ route('getTownships') }}",
+            data: {city_id:city_id},
+            success: function (response) {
+                console.log(response);
+                if(response.length > 1){
+                    $('#township').html(response);
+                } else{
+                    $('#township').empty();
+                    $('#township').html(response);
+                }
+                /* console.log(response); */
+            }
+        });
     }
 </script>
 @endsection

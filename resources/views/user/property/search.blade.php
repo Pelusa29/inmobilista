@@ -207,7 +207,7 @@
                                     <div class="wsus__single_property_img">
                                         <a href="{{ route('property.details',$item->property->slug) }}">
                                             <img src="{{ asset($item->property->thumbnail_image) }}" alt="properties" class="img-fluid w-100">
-                                        </a>                                        
+                                        </a>
 
                                         @if ($item->property->property_purpose_id==1)
                                         <span class="sale">{{ $item->property->propertyPurpose->custom_purpose }}</span>
@@ -513,17 +513,24 @@
             <input type="hidden" name="page_type" value="{{ $page_type }}">
 
             <div class="wsus__single_property_search">
-              <label>{{ $websiteLang->where('lang_key','location')->first()->custom_text }}</label>
-              <select class="select_2" name="city_id">
-                <option value="">{{ $websiteLang->where('lang_key','location')->first()->custom_text }}</option>
-                @foreach ($cities as $city_item)
-                    @if (request()->has('city_id'))
-                        <option {{ request()->get('city_id') == $city_item->id ? 'selected' : ''  }} value="{{ $city_item->id }}">{{ $city_item->name }}</option>
-                    @else
-                        <option value="{{ $city_item->id }}">{{ $city_item->name }}</option>
-                    @endif
-                @endforeach
-            </select>
+                <label>{{ $websiteLang->where('lang_key','location')->first()->custom_text }}</label>
+                <select class="select_2" name="city_id" id="city_id">
+                    <option value="">{{ $websiteLang->where('lang_key','location')->first()->custom_text }}</option>
+                    @foreach ($cities as $city_item)
+                        @if (request()->has('city_id'))
+                            <option {{ request()->get('city_id') == $city_item->id ? 'selected' : ''  }} value="{{ $city_item->id }}">{{ $city_item->name }}</option>
+                        @else
+                            <option value="{{ $city_item->id }}">{{ $city_item->name }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="wsus__single_property_search">
+                <label>{{ $websiteLang->where('lang_key','all_township')->first()->custom_text }}</label>
+                <select class="select_2" name="township" id="township">
+                    <option value="">{{ $websiteLang->where('lang_key','township_describe')->first()->custom_text }}</option>
+                </select>
             </div>
 
             <div class="wsus__single_property_search">
@@ -562,52 +569,6 @@
                     $isCollapse=true;
                 }
             @endphp
-            {{-- <div class="wsus__single_property_search_check">
-              <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
-                  <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        {{ $websiteLang->where('lang_key','aminities')->first()->custom_text }}
-                    </button>
-                  </h2>
-                  <div id="collapseThree" class="accordion-collapse collapse {{ $isCollapse ? 'show' : '' }}" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        @if (request()->has('aminity'))
-                            @foreach ($aminities as $aminity)
-                                @php
-                                    $isChecked=false;
-                                @endphp
-                                @foreach ($searhAminities as $searhAminity)
-                                    @if ($searhAminity==$aminity->id)
-                                        @php
-                                            $isChecked=true;
-                                        @endphp
-                                    @endif
-                                @endforeach
-
-                                <div class="form-check">
-                                    <input {{ $isChecked ? 'checked' : '' }} name="aminity[]" class="form-check-input" type="checkbox" value="{{ $aminity->id }}" id="flexCheckDefault-{{ $aminity->id }}">
-                                    <label class="form-check-label" for="flexCheckDefault-{{ $aminity->id }}">
-                                        {{ $aminity->aminity }}
-                                    </label>
-                                </div>
-                            @endforeach
-                        @else
-                            @foreach ($aminities as $aminity)
-                                <div class="form-check">
-                                    <input name="aminity[]" class="form-check-input" type="checkbox" value="{{ $aminity->id }}" id="flexCheckDefault-{{ $aminity->id }}">
-                                    <label class="form-check-label" for="flexCheckDefault-{{ $aminity->id }}">
-                                        {{ $aminity->aminity }}
-                                    </label>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> --}}
-
             <button type="submit" class="common_btn2">{{ $websiteLang->where('lang_key','search')->first()->custom_text }}</button>
           </form>
         </div>
@@ -616,11 +577,11 @@
   </div>
 </section>
 <!--=====PROPERTY PAGE END=====-->
-
+<input type="hidden" id="townshipCompra" value="{{ $township }}">
+<input type="hidden" id="townshipAlquiler" value="{{ $townshipalquiler }}">
 <script>
-    (function($) {
-    "use strict";
-    $(document).ready(function () {
+    $(document).ready(function(){
+        console.log('ready');
         $("#sortingId").on("change",function(){
             var id=$(this).val();
 
@@ -637,10 +598,69 @@
             }
 
             window.location.href = query_url;
-        })
-
+        });
     });
 
-    })(jQuery);
+    /* Catch Change Event Location */
+    document.getElementById('city_id').onchange = function(){
+        var city_id = this.value;
+        changeDataTownship(city_id);
+    }
+
+    var city_id = document.getElementById("city_id").value;
+    var townshipCompra = document.getElementById("townshipCompra").value;
+    var townshipAlquiler = document.getElementById("townshipAlquiler").value;
+    /* console.log(`this is ${city_id}`);
+    console.log(`this is ${townshipCompra}`);
+    console.log(`this is ${townshipAlquiler}`); */
+    const township_id =  townshipCompra != 0 ? townshipCompra : townshipAlquiler;
+
+    if(city_id != null){
+         $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city_id},
+            success: function (response) {
+                console.log(response);
+                 var options = '';
+                options += '<option value="">' + 'Municipios' + '</option>';
+                for (var i = 0; i < response.length; i++) {
+                    if(township_id == response[i].id){
+                        options += '<option selected value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }else{
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+                    //options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                }
+
+                document.getElementById('township').innerHTML = options;
+            }
+        });
+    }
+
+    function changeDataTownship(city){
+        $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city},
+            success: function (response) {
+                /* console.log(response); */
+                if(response.length > 0){
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+
+                    document.getElementById('township').innerHTML = options;
+                }else{
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    document.getElementById('township').innerHTML = options;
+                }
+            }
+        });
+    }
+
 </script>
 @endsection

@@ -46,7 +46,7 @@
           <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
             <form method="GET" action="{{ route('search-property') }}">
                 <div class="wsus__serach_single">
-                  <select class="select_2" name="city_id" id="city_id" onchange="getTownshipData()">
+                  <select class="select_2" name="city_id" id="city_id">
                       <option value="">{{ $websiteLang->where('lang_key','select_location')->first()->custom_text }}</option>
                       @foreach ($cities as $city_item)
                       <option value="{{ $city_item->id }}">{{ $city_item->name }}</option>
@@ -77,7 +77,7 @@
           <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
             <form method="GET" action="{{ route('search-property') }}">
                 <div class="wsus__serach_single">
-                  <select class="select_2" name="city_id" id="city_id_alquiler" onchange="getTownshipDataAlquiler()">
+                  <select class="select_2" name="city_id" id="city_id_alquiler">
                       <option value="">{{ $websiteLang->where('lang_key','select_location')->first()->custom_text }}</option>
                       @foreach ($cities as $city_item)
                       <option value="{{ $city_item->id }}">{{ $city_item->name }}</option>
@@ -828,48 +828,72 @@ $feature_property=$sections->where('id',4)->first();
   <!--=====TESTIMONIAL END=====-->
 @endif
 @endsection
+@push('js')
 <script>
-function getTownshipData(){
-    var city_id = $('#city_id').val();
-    $.ajax({
-        type: "GET",
-        url: "{{ route('getTownships') }}",
-        data: {city_id:city_id},
-        success: function (response) {
-            console.log(response);
-            if(response.length > 1){
-                document.getElementById( 'dropdownCompras' ).style.display = 'block';
-                $('#township').html(response);
-            } else{
-                document.getElementById( 'dropdownCompras' ).style.display = 'none';
-                $('#township').empty();
-                $('#township').html(response);
-            }
-            /* console.log(response); */
+    document.addEventListener("DOMContentLoaded", function(event) {
+        //código a ejecutar cuando existe la certeza de que el DOM está listo para recibir acciones
+        console.log('listo');
+        document.getElementById('city_id').onchange = function(){
+            var city_id = this.value;
+            getTownshipComprar(city_id);
         }
-    });
-}
 
-
-function getTownshipDataAlquiler(){
-    var city_id = $('#city_id_alquiler').val();
-    /* console.log(city_id); */
-    $.ajax({
-        type: "GET",
-        url: "{{ route('getTownships') }}",
-        data: {city_id:city_id},
-        success: function (response) {
-            console.log(response);
-            if(response.length > 1){
-                document.getElementById( 'dropdownAlquiler' ).style.display = 'block';
-                $('#townshipalquiler').html(response);
-            } else{
-                document.getElementById( 'dropdownAlquiler' ).style.display = 'none';
-                $('#townshipalquiler').empty();
-                $('#townshipalquiler').html(response);
-            }
-            /* console.log(response); */
+        document.getElementById('city_id_alquiler').onchange = function(){
+            var city_id = this.value;
+            getTownshipAlquilar(city_id);
         }
+
     });
-}
+
+    function getTownshipComprar(city){
+        console.log(city);
+         $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city},
+            success: function (response) {
+                /* console.log(response); */
+                if(response.length > 0){
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+
+                    document.getElementById('township').innerHTML = options;
+                    document.getElementById( 'dropdownCompras' ).style.display = 'block';
+                }else{
+                    document.getElementById('township').innerHTML = '';
+                    document.getElementById( 'dropdownCompras' ).style.display = 'none';
+                }
+            }
+        });
+    }
+
+    function getTownshipAlquilar(city){
+        console.log(city);
+         $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city},
+            success: function (response) {
+                /* console.log(response); */
+                if(response.length > 0){
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+
+                    document.getElementById('townshipalquiler').innerHTML = options;
+                    document.getElementById( 'dropdownAlquiler' ).style.display = 'block';
+                }else{
+                    document.getElementById('townshipalquiler').innerHTML = '';
+                    document.getElementById( 'dropdownAlquiler' ).style.display = 'none';
+                }
+            }
+        });
+    }
+
 </script>
+

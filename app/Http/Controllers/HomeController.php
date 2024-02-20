@@ -20,6 +20,7 @@ use App\Location;
 use App\Listing;
 use App\Day;
 use App\Aminity;
+use App\Township;
 use App\Wishlist;
 use App\ListingReview;
 use App\Subscribe;
@@ -622,7 +623,7 @@ class HomeController extends Controller
     {
 
         Paginator::useBootstrap();
-        /* var_dump($request);
+        /* var_dump($request->township);
         exit(); */
         // check page type, page type means grid view or list view
         $page_type = '';
@@ -678,17 +679,26 @@ class HomeController extends Controller
         }
         // end check order type
         // start query
+        //check if township exist
+
         $propertyAminities = PropertyAminity::whereHas('property', function ($query) use ($request) {
+            $township = null;
+
+            if (isset($request->township)) {
+                $township = $request->township;
+            } else if (isset($request->townshipalquiler)) {
+                $township = $request->townshipalquiler;
+            }
+
             if ($request->property_type != null) {
                 $query->where(['property_type_id' => $request->property_type, 'status' => 1]);
             }
             if ($request->city_id != null) {
                 $query->where(['city_id' => $request->city_id, 'status' => 1]);
             }
-            if ($request->township != null) {
-                /* $query->whereIn('id', $cities)->where('status', 1); */
+            if ($township != null) {
+                $query->where(['township_id' => $township, 'status' => 1]);
             }
-
             if ($request->search != null) {
                 $query->where('title', 'LIKE', '%' . $request->search . '%')->where('status', 1);
             }
@@ -731,12 +741,16 @@ class HomeController extends Controller
         $propertyTypes = PropertyType::where('status', 1)->orderBy('type', 'asc')->get();
         $cities = City::where('status', 1)->orderBy('name', 'asc')->get();
         $websiteLang = ManageText::all();
-        return view('user.property.search', compact('propertyAminities', 'aminities', 'seo_text', 'banner_image', 'menus', 'page_type', 'currency', 'propertyTypes', 'cities', 'websiteLang'));
+        $township = isset($request->township) ? $request->township : 0;
+        $townshipalquiler = isset($request->townshipalquiler) ? $request->townshipalquiler : 0;
+        return view('user.property.search', compact('propertyAminities', 'aminities', 'seo_text', 'banner_image', 'menus', 'page_type', 'currency', 'propertyTypes', 'cities', 'websiteLang', 'township', 'townshipalquiler'));
     }
 
     public function searchAgentPage(Request $request)
     {
         // Prepare page data
+        /* var_dump("llego");
+        exit(); */
         Paginator::useBootstrap();
         $banner_image = BannerImage::find(21);
         $paginate_qty = CustomPaginator::where('id', 3)->first()->qty;
@@ -762,5 +776,20 @@ class HomeController extends Controller
         }
 
         return view('user.agent.index', compact('banner_image', 'menus', 'agents', 'orders', 'default_profile_image', 'seo_text', 'websiteLang'));
+    }
+
+    public function dataTownships(Request $request)
+    {
+        if ($request->ajax()) {
+            $city_id = $request->city_id;
+            $townships = Township::where('city_id', $city_id)->get();
+            $townships_option_select = [];
+
+            foreach ($townships as $township) {
+                $townships_option_select[] = array("id" => $township->id, "name" => $township->name);
+            }
+
+            return response()->json($townships_option_select);
+        }
     }
 }
