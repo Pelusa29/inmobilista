@@ -337,6 +337,73 @@ window.addEventListener("load",function(){window.wpcc.init({"border":"{{ $modalC
       });
   });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        //código a ejecutar cuando existe la certeza de que el DOM está listo para recibir acciones
+        console.log('listo');
+        document.getElementById('city_id').onchange = function(){
+            var city_id = this.value;
+            getTownshipComprar(city_id);
+        }
+
+        document.getElementById('city_id_alquiler').onchange = function(){
+            var city_id = this.value;
+            getTownshipAlquilar(city_id);
+        }
+
+    });
+
+    function getTownshipComprar(city){
+        console.log(city);
+         $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city},
+            success: function (response) {
+                /* console.log(response); */
+                if(response.length > 0){
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+
+                    document.getElementById('township').innerHTML = options;
+                    document.getElementById( 'dropdownCompras' ).style.display = 'block';
+                }else{
+                    document.getElementById('township').innerHTML = '';
+                    document.getElementById( 'dropdownCompras' ).style.display = 'none';
+                }
+            }
+        });
+    }
+
+    function getTownshipAlquilar(city){
+        console.log(city);
+         $.ajax({
+            type: "GET",
+            url: "{{ route('dataTownships') }}",
+            data: {city_id:city},
+            success: function (response) {
+                /* console.log(response); */
+                if(response.length > 0){
+                    var options = '';
+                    options += '<option value="">' + 'Municipios' + '</option>';
+                    for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+                    }
+
+                    document.getElementById('townshipalquiler').innerHTML = options;
+                    document.getElementById( 'dropdownAlquiler' ).style.display = 'block';
+                }else{
+                    document.getElementById('township').innerHTML = '';
+                    document.getElementById( 'dropdownAlquiler' ).style.display = 'none';
+                }
+            }
+        });
+    }
+
+</script>
 
 </body>
 
