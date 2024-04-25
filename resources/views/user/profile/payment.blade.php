@@ -39,7 +39,7 @@
             <div class="d-flex align-items-start">
               <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
 
-                @if ($paymentSetting->stripe_status==1)
+                @if ($paymentSetting->stripe_status==2)
                 <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">{{ $websiteLang->where('lang_key','stripe')->first()->custom_text }}</button>
                 @endif
 
@@ -47,24 +47,12 @@
                 <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">{{ $websiteLang->where('lang_key','paypal')->first()->custom_text }}</button>
                 @endif
 
-                @if ($razorpay->razorpay_status==1)
-                <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">{{ $websiteLang->where('lang_key','razorpay')->first()->custom_text }}</button>
+                @if ($zinli)
+                <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">{{ $websiteLang->where('lang_key','zinli')->first()->custom_text }}</button>
                 @endif
 
-                @if ($flutterwave->status == 1)
-                <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">{{ $websiteLang->where('lang_key','flutterwave')->first()->custom_text }}</button>
-                @endif
-
-                @if ($paystack->paystack_status==1)
-                <button class="nav-link" id="paystack-tab" data-bs-toggle="pill" data-bs-target="#paystackTab" type="button" role="tab" aria-controls="paystackTab" aria-selected="false">{{ $websiteLang->where('lang_key','paystack')->first()->custom_text }}</button>
-                @endif
-
-                @if ($paystack->mollie_status==1)
-                <button class="nav-link" id="mollie-tab" data-bs-toggle="pill" data-bs-target="#mollieTab" type="button" role="tab" aria-controls="mollieTab" aria-selected="false">{{ $websiteLang->where('lang_key','mollie')->first()->custom_text }}</button>
-                @endif
-
-                @if ($instamojo->status==1)
-                <button class="nav-link" id="instamojo-tab" data-bs-toggle="pill" data-bs-target="#instamojoTab" type="button" role="tab" aria-controls="instamojoTab" aria-selected="false">{{ $websiteLang->where('lang_key','instamojo')->first()->custom_text }}</button>
+                @if ($binance)
+                <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">{{ $websiteLang->where('lang_key','binance')->first()->custom_text }}</button>
                 @endif
 
                 @if ($paymentSetting->bank_status==1)
@@ -79,7 +67,7 @@
           <div class="wsus__pay_details" id="sticky_sidebar2">
             <h5>{{ $websiteLang->where('lang_key','payment_detail')->first()->custom_text }}</h5>
             <div class="tab-content" id="v-pills-tabContent">
-                @if ($paymentSetting->stripe_status==1)
+                @if ($paymentSetting->stripe_status==2)
                     <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
                         <div class="wsus__pay_card">
                         <form action="{{ route('user.stripe.payment',$package->id) }}" method="POST" class="require-validation"
@@ -122,51 +110,49 @@
                 @endif
 
                 @if ($paymentSetting->paypal_status==1)
-                    <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-                        <a href="{{ route('user.paypal',$package->id) }}" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_paypal')->first()->custom_text }}</a>
+                    <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab" style="text-align: center;">
+                        {{-- <a href="{{ route('user.paypal',$package->id) }}" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_paypal')->first()->custom_text }}</a> --}}
+                        <a href="{{ route('user.paypal',$package->id) }}" class="">
+                            <div id="paypal-button-container" style="max-width:1000px;"></div>
+                        </a>
                     </div>
                 @endif
-                @if ($razorpay->razorpay_status==1)
-                    <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-                        <form action="{{ route('user.razorpay-payment',$package->id) }}" method="POST" >
-                            @csrf
-                            @php
-                                $payableAmount = round($package_price * $razorpay->currency_rate,2);
-                            @endphp
-                            <script src="https://checkout.razorpay.com/v1/checkout.js"
-                                    data-key="{{ $razorpay->razorpay_key }}"
-                                    data-currency="{{ $razorpay->currency_code }}"
-                                    data-amount= "{{ $payableAmount * 100 }}"
-                                    data-buttontext="{{ $websiteLang->where('lang_key','pay')->first()->custom_text }} {{ $payableAmount }} {{ $razorpay->currency_code }}"
-                                    data-name="{{ $razorpay->name }}"
-                                    data-description="{{ $razorpay->description }}"
-                                    data-image="{{ asset($razorpay->image) }}"
-                                    data-prefill.name=""
-                                    data-prefill.email=""
-                                    data-theme.color="{{ $razorpay->theme_color }}">
-                            </script>
-                        </form>
-
-                    </div>
-                @endif
-
-                @if ($flutterwave->status == 1)
+                {{--  @if ($zinli)
                     <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
                         <a href="javascript:;" onClick="makePayment()" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_flutterwave')->first()->custom_text }}</a>
                     </div>
+                @endif --}}
+                 @if ($binance)
+                   <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                        <a href="javascript:;" type="button" class="common_btn mt_25" id="paymentbinance">{{ $websiteLang->where('lang_key','pay_with_binance')->first()->custom_text }}</a>
+                    </div>
+                @endif
+                @if ($zinli)
+                    <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                        <a href="javascript:;" type="button" class="common_btn mt_25" id="paymentzinli">{{ $websiteLang->where('lang_key','pay_with_zinli')->first()->custom_text }}</a>
+                        {{-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="payzinli()">
+                            Opern Modal
+                        </button> --}}
+                    </div>
                 @endif
 
-                <div class="tab-pane fade" id="paystackTab" role="tabpanel" aria-labelledby="paystack-tab">
+                {{-- @if ($flutterwave->status == 1)
+                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                        <a href="javascript:;" onClick="makePayment()" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_flutterwave¿')->first()->custom_text }}</a>
+                    </div>
+                @endif --}}
+
+               {{--  <div class="tab-pane fade" id="paystackTab" role="tabpanel" aria-labelledby="paystack-tab">
                     <a href="javascript:;" class="common_btn mt_25" onclick="payWithPaystack()">{{ $websiteLang->where('lang_key','pay_with_paystack')->first()->custom_text }}</a>
-                  </div>
+                </div>
 
-                  <div class="tab-pane fade" id="mollieTab" role="tabpanel" aria-labelledby="mollie-tab">
+                <div class="tab-pane fade" id="mollieTab" role="tabpanel" aria-labelledby="mollie-tab">
                     <a href="{{ route('user.mollie-payment', $package->id) }}" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_mollie')->first()->custom_text }}</a>
-                  </div>
+                </div>
 
-                  <div class="tab-pane fade" id="instamojoTab" role="tabpanel" aria-labelledby="instamojo-tab">
+                <div class="tab-pane fade" id="instamojoTab" role="tabpanel" aria-labelledby="instamojo-tab">
                     <a href="{{ route('user.pay-with-instamojo', $package->id) }}" class="common_btn mt_25">{{ $websiteLang->where('lang_key','pay_with_instamojo')->first()->custom_text }}</a>
-                  </div>
+                </div> --}}
 
 
 
@@ -183,7 +169,6 @@
 
                             <button type="submit" class="common_btn">{{ $websiteLang->where('lang_key','payment')->first()->custom_text }}</button>
                         </form>
-
                     </div>
                 @endif
 
@@ -324,11 +309,84 @@
       </div>
     </div>
   </section>
+   {{-- Modal Payment--}}
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Formulario de Pago Zinli</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('user.zinli-payment') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="tranc_id">Id Transacciónal</label>
+                                <input placeholder="{{ $websiteLang->where('lang_key','trans_info')->first()->custom_text }}" name="transaction"  id="" required />
+                            </div>
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="email">Correo Electronico</label>
+                                <input type="email" placeholder="Email" name="email" id="" required>
+                            </div>
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="evidence">Evidencia</label>
+                                <input type="file" placeholder="Evidencia" name="file_input" id="">
+                            </div>
+                            <input type="hidden" name="package_id" value="{{ $package->id }}">
+
+                            <button type="submit" class="common_btn">{{ $websiteLang->where('lang_key','payment')->first()->custom_text }}</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btnClosePayments">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="binanceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Formulario de Pago Binance</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('user.binance-payment') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="tranc_id">Id Transacciónal</label>
+                                <input placeholder="{{ $websiteLang->where('lang_key','trans_info')->first()->custom_text }}" name="transaction"  id="" required />
+                            </div>
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="email">Correo Electronico</label>
+                                <input type="email" placeholder="Email" name="email" id="" required>
+                            </div>
+                            <div class="wsus__con_form_single mt_25">
+                                <label for="evidence">Evidencia</label>
+                                <input type="file" placeholder="Evidencia" name="file_input" id="">
+                            </div>
+                            <input type="hidden" name="package_id" value="{{ $package->id }}">
+
+                            <button type="submit" class="common_btn">{{ $websiteLang->where('lang_key','payment')->first()->custom_text }}</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btnCloseBinancePayments">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
   <!--=====CHECKOUT END=====-->
 
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 <script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD" data-sdk-integration-source="button-factory"></script>
 
 <script>
     // stripe
@@ -380,7 +438,43 @@
                 $form.get(0).submit();
             }
         }
+
+        /* Payment Modal */
+        $("#paymentzinli").click(function(){
+            $('#exampleModal').find('form').trigger('reset');
+            $('#exampleModal').modal('show');
+        });
+
+         $("#paymentbinance").click(function(){
+            $('#binanceModal').find('form').trigger('reset');
+            $('#binanceModal').modal('show');
+        });
+
+        $("#btnClosePayments").click(function(){
+            //Reset Form
+            $('#exampleModal').find('form').trigger('reset');
+            $('#exampleModal').modal('hide');
+        });
+
+        $("#btnCloseBinancePayments").click(function(){
+            //Reset Form
+            $('#binanceModal').find('form').trigger('reset');
+            $('#binanceModal').modal('hide');
+        });
+
+        /* $('#exampleModal').modal('show'); */
     });
+</script>
+<script>
+  paypal.Buttons({
+      style: {
+          shape: 'rect',
+          color: 'gold',
+          layout: 'horizontal',
+          label: 'buynow',
+
+      }
+  }).render('#paypal-button-container');
 </script>
 
 @php
@@ -444,7 +538,7 @@
     }
 
 
-function payWithPaystack(){
+function payWithPaystack() {
     var package_id = '{{ $package->id }}';
   var handler = PaystackPop.setup({
     key: '{{ $public_key }}',

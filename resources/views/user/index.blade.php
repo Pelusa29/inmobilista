@@ -139,14 +139,14 @@
               </div>
               <div class="col-12">
                     <div class="wsus__about_tab">
-                        <ul class="nav nav-pills" id="pills-tab" role="tablist" style="background: #450083;">
+                       {{--  <ul class="nav nav-pills" id="pills-tab" role="tablist" style="background: #450083;">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">{{ $websiteLang->where('lang_key','about_us')->first()->custom_text }}</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile-data" type="button" role="tab" aria-controls="pills-profile-data" aria-selected="false">{{ $websiteLang->where('lang_key','service')->first()->custom_text }}</button>
                             </li>
-                        </ul>
+                        </ul> --}}
                         <div class="tab-content" id="pills-tabContent">
                             <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
                                 {!! clean($aboutUs->about) !!}
@@ -204,7 +204,7 @@
             <div class="row">
                 <div class="col-12">
                 <div class="wsus__section_heading text-center mb_15">
-                    <h2>{{ $team_section_partner->header }}asasa</h2>
+                    <h2>{{ $team_section_partner->header }}</h2>
                     <span>{{ $team_section_partner->description }}</span>
                 </div>
                 </div>

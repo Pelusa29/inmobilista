@@ -165,6 +165,8 @@ Route::group(['as' => 'user.', 'prefix' => 'user'], function () {
     Route::post('wire-transfer/{package}', [PaymentController::class, 'transfer'])->name('purchase.transfer');
 
     Route::post('bank-payment', [PaymentController::class, 'bankPayment'])->name('bank-payment');
+    Route::post('zinli-payment', [PaymentController::class, 'zinliPayment'])->name('zinli-payment');
+    Route::post('binance-payment', [PaymentController::class, 'binancePayment'])->name('binance-payment');
 
 
     Route::get('paypal/{id}', [PaypalController::class, 'store'])->name('paypal');
