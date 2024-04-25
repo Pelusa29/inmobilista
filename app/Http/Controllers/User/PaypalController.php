@@ -31,21 +31,29 @@ use App\Package;
 use Session;
 
 use App\Helpers\MailHelper;
+
 class PaypalController extends Controller
 {
     private $apiContext;
     public function __construct()
     {
-        $account=PaymentAccount::first();
-    /** PayPal api context **/
+        $account = PaymentAccount::first();
+        $client_id =  env('PAYPAL_CLIENT_ID');
+        /* var_dump($account->paypal_client_id);
+        exit(); */
+        /** PayPal api context **/
         $paypal_conf = \Config::get('paypal');
-        $this->apiContext = new ApiContext(new OAuthTokenCredential(
-            $account->paypal_client_id,
-            $account->paypal_secret,
+        /* var_dump($client_id);
+        var_dump($account->paypal_secret);
+        exit(); */
+        $this->apiContext = new ApiContext(
+            new OAuthTokenCredential(
+                env('PAYPAL_CLIENT_ID'),
+                env('PAYPAL_SECRET'),
             )
         );
 
-        $setting=array(
+        $setting = array(
             'mode' => $account->account_mode,
             'http.ConnectionTimeOut' => 30,
             'log.LogEnabled' => true,
@@ -54,47 +62,49 @@ class PaypalController extends Controller
         );
         $this->apiContext->setConfig($setting);
     }
-    public function paypal(){
+    public function paypal()
+    {
         return view('paypal');
     }
 
-    public function store($id){
+    public function store($id)
+    {
 
         // project demo mode check
-        if(env('PROJECT_MODE')==0){
-            $notification=array(
-                'messege'=>env('NOTIFY_TEXT'),
-                'alert-type'=>'error'
+        if (env('PROJECT_MODE') == 0) {
+            $notification = array(
+                'messege' => env('NOTIFY_TEXT'),
+                'alert-type' => 'error'
             );
 
             return redirect()->back()->with($notification);
         }
         // end
 
-        $package=Package::find($id);
-        if(!$package){
-            $notify_lang=NotificationText::all();
-            $notification=$notify_lang->where('lang_key','something')->first()->custom_text;
-            $notification=array('messege'=>$notification,'alert-type'=>'error');
+        $package = Package::find($id);
+        if (!$package) {
+            $notify_lang = NotificationText::all();
+            $notification = $notify_lang->where('lang_key', 'something')->first()->custom_text;
+            $notification = array('messege' => $notification, 'alert-type' => 'error');
 
             return redirect()->route('pricing.plan')->with($notification);
         }
 
 
-        Session::put('listing_package_id',$id);
+        Session::put('listing_package_id', $id);
 
-        $price=$package->price;
+        $price = $package->price;
 
-        $setting=Setting::first();
-        $paypalSetting=PaymentAccount::first();
-        $amount_usd= round($package->price * $paypalSetting->paypal_currency_rate,2);
-        $name=env('APP_NAME');
+        $setting = Setting::first();
+        $paypalSetting = PaymentAccount::first();
+        $amount_usd = round($package->price * $paypalSetting->paypal_currency_rate, 2);
+        $name = env('APP_NAME');
 
         // set payer
         $payer = new Payer();
         $payer->setPaymentMethod("paypal");
 
-        $currency=Setting::first();
+        $currency = Setting::first();
         // set amount total
         $amount = new Amount();
         $amount->setCurrency($paypalSetting->paypal_currency_code)
@@ -109,9 +119,9 @@ class PaypalController extends Controller
         // redirect url
         $redirectUrls = new RedirectUrls();
 
-        $root_url=url('/');
-        $redirectUrls->setReturnUrl($root_url."/user/paypal-payment-success")
-            ->setCancelUrl($root_url."/user/paypal-payment-cancled");
+        $root_url = url('/');
+        $redirectUrls->setReturnUrl($root_url . "/user/paypal-payment-success")
+            ->setCancelUrl($root_url . "/user/paypal-payment-cancled");
 
         // payment
         $payment = new Payment();
@@ -122,9 +132,9 @@ class PaypalController extends Controller
         try {
             $payment->create($this->apiContext);
         } catch (\PayPal\Exception\PPConnectionException $ex) {
-            $notify_lang=NotificationText::all();
-            $notification=$notify_lang->where('lang_key','payment_faild')->first()->custom_text;
-            $notification=array('messege'=>$notification,'alert-type'=>'error');
+            $notify_lang = NotificationText::all();
+            $notification = $notify_lang->where('lang_key', 'payment_faild')->first()->custom_text;
+            $notification = array('messege' => $notification, 'alert-type' => 'error');
 
             return redirect()->route('pricing.plan')->with($notification);
         }
@@ -135,18 +145,19 @@ class PaypalController extends Controller
         return redirect($approvalUrl);
     }
 
-    public function paymentSuccess(Request $request){
+    public function paymentSuccess(Request $request)
+    {
 
         if (empty($request->get('PayerID')) || empty($request->get('token'))) {
-            $notify_lang=NotificationText::all();
-            $notification=$notify_lang->where('lang_key','payment_faild')->first()->custom_text;
-            $notification=array('messege'=>$notification,'alert-type'=>'error');
+            $notify_lang = NotificationText::all();
+            $notification = $notify_lang->where('lang_key', 'payment_faild')->first()->custom_text;
+            $notification = array('messege' => $notification, 'alert-type' => 'error');
 
-            $package_id=Session::get('listing_package_id');
-            return redirect()->route('user.payment.page',$package_id)->with($notification);
+            $package_id = Session::get('listing_package_id');
+            return redirect()->route('user.payment.page', $package_id)->with($notification);
         }
 
-        $payment_id=$request->get('paymentId');
+        $payment_id = $request->get('paymentId');
         $payment = Payment::get($payment_id, $this->apiContext);
         $execution = new PaymentExecution();
         $execution->setPayerId($request->get('PayerID'));
@@ -155,64 +166,64 @@ class PaypalController extends Controller
 
         if ($result->getState() == 'approved') {
 
-            $package_id=Session::get('listing_package_id');
-            $package=Package::find($package_id);
+            $package_id = Session::get('listing_package_id');
+            $package = Package::find($package_id);
 
-            if(!$package){
-                $notify_lang=NotificationText::all();
-                $notification=$notify_lang->where('lang_key','something')->first()->custom_text;
-                $notification=array('messege'=>$notification,'alert-type'=>'error');
+            if (!$package) {
+                $notify_lang = NotificationText::all();
+                $notification = $notify_lang->where('lang_key', 'something')->first()->custom_text;
+                $notification = array('messege' => $notification, 'alert-type' => 'error');
 
                 return redirect()->route('pricing.plan')->with($notification);
             }
 
-            $user=Auth::guard('web')->user();
-            $currency=Setting::first();
+            $user = Auth::guard('web')->user();
+            $currency = Setting::first();
 
 
-            $activeOrder=Order::where(['user_id'=>$user->id,'status'=>1])->count();
-            $oldOrders=Order::where('user_id',$user->id)->update(['status'=>0]);
+            $activeOrder = Order::where(['user_id' => $user->id, 'status' => 1])->count();
+            $oldOrders = Order::where('user_id', $user->id)->update(['status' => 0]);
 
-            $setting=Setting::first();
-            $paypalSetting=PaymentAccount::first();
-            $amount_usd= round($package->price * $paypalSetting->paypal_currency_rate,2);
+            $setting = Setting::first();
+            $paypalSetting = PaymentAccount::first();
+            $amount_usd = round($package->price * $paypalSetting->paypal_currency_rate, 2);
 
-            $order=new Order();
-            $order->user_id=$user->id;
-            $order->order_id='#'.rand(22,44).date('Ydmis');
-            $order->package_id=$package->id;
-            $order->purchase_date=date('Y-m-d');
-            $order->expired_day=$package->number_of_days;
-            $order->expired_date=$package->number_of_days ==-1 ? null : date('Y-m-d', strtotime($package->number_of_days.' days'));
-            $order->payment_method="Paypal";
-            $order->transaction_id=$payment_id;
-            $order->payment_status=1;
-            $order->amount_usd=$amount_usd;
-            $order->amount_real_currency=$package->price;
-            $order->currency_type=$setting->currency_name;
-            $order->currency_icon=$setting->currency_icon;
-            $order->status=1;
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->order_id = '#' . rand(22, 44) . date('Ydmis');
+            $order->package_id = $package->id;
+            $order->purchase_date = date('Y-m-d');
+            $order->expired_day = $package->number_of_days;
+            $order->expired_date = $package->number_of_days == -1 ? null : date('Y-m-d', strtotime($package->number_of_days . ' days'));
+            $order->payment_method = "Paypal";
+            $order->transaction_id = $payment_id;
+            $order->payment_status = 1;
+            $order->amount_usd = $amount_usd;
+            $order->amount_real_currency = $package->price;
+            $order->currency_type = $setting->currency_name;
+            $order->currency_icon = $setting->currency_icon;
+            $order->status = 1;
             $order->save();
 
 
 
 
             // active and  in-active minimum limit listing
-            $userListings=Property::where('user_id',$user->id)->orderBy('id','desc')->get();
-            if($userListings->count() !=0){
-                if($package->number_of_property !=-1){
-                    foreach($userListings as $index => $listing){
-                        if(++$index <= $package->number_of_property){
-                            $listing->status=1;
+            $userListings = Property::where('user_id', $user->id)->orderBy('id', 'desc')->get();
+            if ($userListings->count() != 0) {
+                if ($package->number_of_property != -1) {
+                    foreach ($userListings as $index => $listing) {
+                        if (++$index <= $package->number_of_property) {
+                            $listing->status = 1;
                             $listing->save();
-                        }else{
-                            $listing->status=0;
+                        } else {
+                            $listing->status = 0;
                             $listing->save();
                         }
                     }
-                }elseif($package->number_of_property ==-1){
-                    foreach($userListings as $index => $listing){
-                        $listing->status=1;
+                } elseif ($package->number_of_property == -1) {
+                    foreach ($userListings as $index => $listing) {
+                        $listing->status = 1;
                         $listing->save();
                     }
                 }
@@ -221,46 +232,47 @@ class PaypalController extends Controller
 
 
             // setup expired date
-            if($userListings->count() != 0){
-                foreach($userListings as $index => $listing){
-                    $listing->expired_date=$order->expired_date;
+            if ($userListings->count() != 0) {
+                foreach ($userListings as $index => $listing) {
+                    $listing->expired_date = $order->expired_date;
                     $listing->save();
                 }
             }
 
             MailHelper::setMailConfig();
 
-            $order_details='Purchase Date: '.$order->purchase_date.'<br>';
-            $order_details .='Expired Date: '.$order->expired_date;
+            $order_details = 'Purchase Date: ' . $order->purchase_date . '<br>';
+            $order_details .= 'Expired Date: ' . $order->expired_date;
 
             // send email
-            $template=EmailTemplate::where('id',6)->first();
-            $message=$template->description;
-            $subject=$template->subject;
-            $message=str_replace('{{user_name}}',$user->name,$message);
-            $message=str_replace('{{payment_method}}','Paypal',$message);
-            $total_amount=$currency->currency_icon. $package->price;
-            $message=str_replace('{{amount}}',$total_amount,$message);
-            $message=str_replace('{{order_details}}',$order_details,$message);
-            Mail::to($user->email)->send(new OrderConfirmation($message,$subject));
+            $template = EmailTemplate::where('id', 6)->first();
+            $message = $template->description;
+            $subject = $template->subject;
+            $message = str_replace('{{user_name}}', $user->name, $message);
+            $message = str_replace('{{payment_method}}', 'Paypal', $message);
+            $total_amount = $currency->currency_icon . $package->price;
+            $message = str_replace('{{amount}}', $total_amount, $message);
+            $message = str_replace('{{order_details}}', $order_details, $message);
+            Mail::to($user->email)->send(new OrderConfirmation($message, $subject));
 
 
-            $notify_lang=NotificationText::all();
-            $notification=$notify_lang->where('lang_key','order_success')->first()->custom_text;
-            $notification=array('messege'=>$notification,'alert-type'=>'success');
+            $notify_lang = NotificationText::all();
+            $notification = $notify_lang->where('lang_key', 'order_success')->first()->custom_text;
+            $notification = array('messege' => $notification, 'alert-type' => 'success');
             return redirect()->route('user.my-order')->with($notification);
         }
 
-        $notify_lang=NotificationText::all();
-        $notification=$notify_lang->where('lang_key','payment_faild')->first()->custom_text;
-        $notification=array('messege'=>$notification,'alert-type'=>'error');
+        $notify_lang = NotificationText::all();
+        $notification = $notify_lang->where('lang_key', 'payment_faild')->first()->custom_text;
+        $notification = array('messege' => $notification, 'alert-type' => 'error');
 
         return redirect()->route('pricing.plan')->with($notification);
     }
-    public function paymentCancled(){
-        $notify_lang=NotificationText::all();
-        $notification=$notify_lang->where('lang_key','payment_faild')->first()->custom_text;
-        $notification=array('messege'=>$notification,'alert-type'=>'error');
+    public function paymentCancled()
+    {
+        $notify_lang = NotificationText::all();
+        $notification = $notify_lang->where('lang_key', 'payment_faild')->first()->custom_text;
+        $notification = array('messege' => $notification, 'alert-type' => 'error');
 
         return redirect()->route('pricing.plan')->with($notification);
     }
