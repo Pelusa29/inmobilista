@@ -56,7 +56,6 @@
                             @endif
 
                         <button id="forgBtn" class="common_btn mt-1 mb-3" type="submit"><i id="forg-spinner" class="loading-icon fa fa-spin fa-spinner d-none"></i> {{ $websiteLang->where('lang_key','send_mail')->first()->custom_text }}</button>
-
                         <div class="wsus__reg_forget">
                             <a href="{{ route('login') }}">{{ $websiteLang->where('lang_key','login_here')->first()->custom_text }}</a>
                         </div>
@@ -99,6 +98,7 @@
                 type:"post",
                 data:$('#forgetFormSubmit').serialize(),
                 success:function(response){
+                    console.log(response);
                     if(response.success){
                         $("#forgetFormSubmit").trigger("reset");
                         $("#forg-spinner").addClass('d-none')
@@ -118,6 +118,7 @@
                     }
                 },
                 error:function(response){
+                    consoe.log(response);
                     if(response.responseJSON.errors.email){
                         $("#forg-spinner").addClass('d-none')
                         $("#forgBtn").removeClass('custom-opacity')
@@ -149,6 +150,8 @@
                     return;
                 }
                 // end
+
+            console.log(`${isDemo} demo`);
             $("#forg-spinner").removeClass('d-none')
             $("#forgBtn").addClass('custom-opacity')
             $("#forgBtn").attr('disabled',true);
@@ -157,6 +160,7 @@
                 type:"post",
                 data:$('#forgetFormSubmit').serialize(),
                 success:function(response){
+                    console.log(response);
                     if(response.success){
                         $("#forgetFormSubmit").trigger("reset");
                         $("#forg-spinner").addClass('d-none')
@@ -176,6 +180,7 @@
                     }
                 },
                 error:function(response){
+                    console.log(response.responseJSON);
                     if(response.responseJSON.errors.email){
                         $("#forg-spinner").addClass('d-none')
                         $("#forgBtn").removeClass('custom-opacity')
